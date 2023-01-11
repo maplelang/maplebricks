@@ -23,7 +23,6 @@ const COLOR_PURPLE  : Uint8 = 6
 const COLOR_RED     : Uint8 = 7
 const COLOR_GRAY    : Uint8 = 8
 
-/*
 const COLORMAP: [9]Color = [
   Color(-1,  -1,  -1 ), // Invalid
   Color(0,   240, 241), // Cyan
@@ -35,7 +34,6 @@ const COLORMAP: [9]Color = [
   Color(241, 0,   0  ), // Red
   Color(150, 150, 150)  // Gray
 ]
-*/
 
 // Playfield size
 const PLAYFIELD_W: Uintn = 10
@@ -148,23 +146,24 @@ function move_brick(
   let oldpoints = (*brick).points;
 
   let mut i = 0;
+
   while i < 4 {
     let p = &(*brick).points[i];
     i += 1;
     (*p).x += disp_x;
     (*p).y += disp_y;
-    if (*p).y < 0 || (*p).y >= PLAYFIELD_H { ok = false; break };
-    if (*p).x < 0 || (*p).x >= PLAYFIELD_W { ok = false; break };
+    if (*p).y < 0 || (*p).y >= PLAYFIELD_H { ok = false; break }
+    if (*p).x < 0 || (*p).x >= PLAYFIELD_W { ok = false; break }
     if (*playfield)[(*p).y as <Uintn>]
                    [(*p).x as <Uintn>] != 0 { ok = false; break }
-  };
+  }
 
   if ok {
     (*brick).offset.x += disp_x;
     (*brick).offset.y += disp_y;
   } else {
     (*brick).points = oldpoints;
-  };
+  }
 
   ok
 }
@@ -180,16 +179,18 @@ function flatten_brick(
     i += 1;
     (*playfield)[(*p).y as <Uintn>]
                 [(*p).x as <Uintn>] = (*brick).color_idx;
-  };
+  }
   // Scan for complete lines
   let mut y = 0;
   while y < PLAYFIELD_H {
     let mut x = 0;
     let mut complete = true;
+
     while x < PLAYFIELD_W {
-      if (*playfield)[y][x] == 0 { complete = false; break; };
+      if (*playfield)[y][x] == 0 { complete = false; break }
       x += 1;
-    };
+    }
+
     if complete {
       libc::memset(&(*playfield)[y][0], 0, PLAYFIELD_W);
       let mut cy = y;
@@ -198,9 +199,9 @@ function flatten_brick(
                       &(*playfield)[cy - 1][0], PLAYFIELD_W);
         cy -= 1;
       }
-    };
+    }
     y += 1;
-  };
+  }
 }
 
 function rotate_brick(
@@ -218,11 +219,10 @@ function rotate_brick(
     let tmp = (*p).x - (*brick).offset.x;
     (*p).x = 1 - ((*p).y - (*brick).offset.y - ((*brick).box_width - 2)) + (*brick).offset.x;
     (*p).y = tmp + (*brick).offset.y;
-    if (*p).y < 0 || (*p).y >= PLAYFIELD_H { ok = false; break };
-    if (*p).x < 0 || (*p).x >= PLAYFIELD_W { ok = false; break };
-    if (*playfield)[(*p).y as <Uintn>]
-                   [(*p).x as <Uintn>] != 0 { ok = false; break }
-  };
+    if (*p).y < 0 || (*p).y >= PLAYFIELD_H { ok = false; break }
+    if (*p).x < 0 || (*p).x >= PLAYFIELD_W { ok = false; break }
+    if (*playfield)[(*p).y as <Uintn>][(*p).x as <Uintn>] != 0 { ok = false; break }
+  }
 
   if !ok {
     (*brick).points = oldpoints;
@@ -230,26 +230,13 @@ function rotate_brick(
 }
 
 function main() -> Int32 {
-  // FIXME: allow this to be global
-  let COLORMAP = [
-    Color(-1,  -1,  -1 ), // Invalid
-    Color(0,   240, 241), // Cyan
-    Color(0,   0,   240), // Blue
-    Color(237, 161, 0  ), // Orange
-    Color(240, 240, 0  ), // Yellow
-    Color(0,   240, 0  ), // Green
-    Color(160, 0,   241), // Purple
-    Color(241, 0,   0  ), // Red
-    Color(150, 150, 150)  // Gray
-  ];
-
   // Initialize SDL2 and SDL2_image
   if sdl2::SDL_Init(sdl2::SDL_INIT_EVERYTHING) != 0 {
     libc::fprintf(libc::stderr,
                   c"Failed to initialze SDL2: %s\n",
                   sdl2::SDL_GetError());
     return 1;
-  };
+  }
 
   sdl2::IMG_Init(sdl2::IMG_INIT_PNG);
 
@@ -270,8 +257,8 @@ function main() -> Int32 {
                                           index: -1,
                                           flags: 0);
   // Set playfield background color
-  // FIXME: actually use background constant from above
-  sdl2::SDL_SetRenderDrawColor(renderer, r: 50, g: 50, b: 50, a: 0);
+  sdl2::SDL_SetRenderDrawColor(renderer,
+    BACKGROUND.r, BACKGROUND.g, BACKGROUND.b, a: 0);
 
   // Load brick texture
   let texture = sdl2::IMG_LoadTexture(renderer, c"brick.png");
@@ -286,9 +273,9 @@ function main() -> Int32 {
     while x < PLAYFIELD_W {
       playfield[y][x] = 0;
       x += 1;
-    };
+    }
     y += 1;
-  };
+  }
 
   let mut fall_interval: Uint32 = 500;
   let mut move_interval: Uint32 = 70;
@@ -333,10 +320,12 @@ function main() -> Int32 {
       } else if event.type == sdl2::SDL_QUIT {
         quit = true;
       }
-    };
+    }
 
     // Exit event loop
-    if quit { break };
+    if quit {
+      break
+    }
 
     // Draw
     sdl2::SDL_RenderClear(renderer);
@@ -353,7 +342,7 @@ function main() -> Int32 {
       // FIXME: add nil keyword
       sdl2::SDL_RenderCopy(renderer, texture, 0 as <*sdl2::SDL_Rect>, &rect);
       i += 1;
-    };
+    }
 
     // Stationery part of the build
     let mut y = 0;
@@ -369,11 +358,11 @@ function main() -> Int32 {
                                     w: BRICK_W,
                                     h: BRICK_H);
           sdl2::SDL_RenderCopy(renderer, texture, 0 as <*sdl2::SDL_Rect>, &rect);
-        };
+        }
         x += 1;
-      };
+      }
       y += 1;
-    };
+    }
 
     sdl2::SDL_RenderPresent(renderer);
 
@@ -383,24 +372,24 @@ function main() -> Int32 {
       if !move_brick(&brick, &playfield, 0, 1) {
         spawn_piece = true;
         spawn_time = cur_time + 200;
-      };
+      }
       prev_fall = cur_time;
-    };
+    }
     if !spawn_piece && cur_time > prev_move + move_interval {
       if moving_left {
         move_brick(&brick, &playfield, -1, 0);
-      };
+      }
       if moving_right {
         move_brick(&brick, &playfield, 1, 0);
-      };
+      }
       prev_move = cur_time;
-    };
+    }
     if spawn_piece && cur_time > spawn_time {
       flatten_brick(&brick, &playfield);
       brick = create_random();
       spawn_piece = false;
     }
-  };
+  }
 
   // Cleanup
   sdl2::SDL_DestroyRenderer(renderer);
