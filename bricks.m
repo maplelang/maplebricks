@@ -339,8 +339,7 @@ function main() -> Int32 {
                                 y: brick.points[i].y * BRICK_H,
                                 w: BRICK_W,
                                 h: BRICK_H);
-      // FIXME: add nil keyword
-      sdl2::SDL_RenderCopy(renderer, texture, 0 as <*sdl2::SDL_Rect>, &rect);
+      sdl2::SDL_RenderCopy(renderer, texture, nil, &rect);
       i += 1;
     }
 
@@ -357,7 +356,7 @@ function main() -> Int32 {
                                     y: y * BRICK_H,
                                     w: BRICK_W,
                                     h: BRICK_H);
-          sdl2::SDL_RenderCopy(renderer, texture, 0 as <*sdl2::SDL_Rect>, &rect);
+          sdl2::SDL_RenderCopy(renderer, texture, nil, &rect);
         }
         x += 1;
       }
