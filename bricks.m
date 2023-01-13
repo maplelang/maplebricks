@@ -3,6 +3,7 @@
 // Copyright (C) Mate Kukri, 2023
 //
 
+import std
 import libc
 import sdl2
 
@@ -192,11 +193,10 @@ function flatten_brick(
     }
 
     if complete {
-      libc::memset(&(*playfield)[y][0], 0, PLAYFIELD_W);
+      std::zero_bytes(&(*playfield)[y][0], PLAYFIELD_W);
       let mut cy = y;
       while cy > 0 {
-        libc::memmove(&(*playfield)[cy][0],
-                      &(*playfield)[cy - 1][0], PLAYFIELD_W);
+        std::copy_bytes(&(*playfield)[cy][0], &(*playfield)[cy - 1][0], PLAYFIELD_W);
         cy -= 1;
       }
     }
@@ -297,7 +297,7 @@ function main() -> Int32 {
     let mut quit = false;
 
     while sdl2::SDL_PollEvent(&event) != 0 {
-      if event.type == sdl2::SDL_KEYUP {
+      if event._type == sdl2::SDL_KEYUP {
         let scancode = event.key.keysym.scancode;
         if scancode == sdl2::SDL_SCANCODE_DOWN {
           fall_interval = 500;
@@ -306,7 +306,7 @@ function main() -> Int32 {
         } else if scancode == sdl2::SDL_SCANCODE_RIGHT {
           moving_right = false;
         }
-      } else if event.type == sdl2::SDL_KEYDOWN {
+      } else if event._type == sdl2::SDL_KEYDOWN {
         let scancode = event.key.keysym.scancode;
         if scancode == sdl2::SDL_SCANCODE_UP {
           rotate_brick(&brick, &playfield);
@@ -317,7 +317,7 @@ function main() -> Int32 {
         } else if scancode == sdl2::SDL_SCANCODE_RIGHT {
           moving_right = true;
         }
-      } else if event.type == sdl2::SDL_QUIT {
+      } else if event._type == sdl2::SDL_QUIT {
         quit = true;
       }
     }
