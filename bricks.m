@@ -3,7 +3,7 @@
 // Copyright (C) Mate Kukri, 2023
 //
 
-import std
+import mem
 import libc
 import sdl2
 
@@ -193,10 +193,10 @@ function flatten_brick(
     }
 
     if complete {
-      std::zero_bytes(&(*playfield)[y][0], PLAYFIELD_W);
+      mem::zero_bytes(&(*playfield)[y][0], PLAYFIELD_W);
       let mut cy = y;
       while cy > 0 {
-        std::copy_bytes(&(*playfield)[cy][0], &(*playfield)[cy - 1][0], PLAYFIELD_W);
+        mem::copy_bytes(&(*playfield)[cy][0], &(*playfield)[cy - 1][0], PLAYFIELD_W);
         cy -= 1;
       }
     }
